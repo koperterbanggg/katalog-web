@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Katalog Sederhana</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --muted: #94a3b8;
+      --text: #e5e7eb;
+      --accent: #22d3ee;
+      --accent-2: #38bdf8;
+      --ring: #1f2937;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      background: linear-gradient(180deg, #0b1223, var(--bg));
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px
+    }
+
+    header {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px
+    }
+
+    .title {
+      font-size: clamp(22px, 3.2vw, 32px);
+      font-weight: 800;
+      letter-spacing: .3px
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 14px
+    }
+
+    .toolbar {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr 180px 160px
+    }
+
+    .toolbar input,
+    .toolbar select {
+      width: 100%;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--ring);
+      background: rgba(255, 255, 255, .03);
+      color: var(--text);
+      outline: none
+    }
+
+    .toolbar input:focus,
+    .toolbar select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(34, 211, 238, .18)
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 14px
+    }
+
+    @media (max-width:1050px) {
+      .grid {
+        grid-template-columns: repeat(3, 1fr)
+      }
+    }
+
+    @media (max-width:760px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .grid {
+        grid-template-columns: repeat(2, 1fr)
+      }
+    }
+
+    @media (max-width:500px) {
+      .grid {
+        grid-template-columns: 1fr
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .02));
+      border: 1px solid var(--ring);
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative
+    }
+
+    .thumb {
+      aspect-ratio: 4/3;
+      background: #0b1020;
+      display: block;
+      width: 100%;
+      object-fit: cover
+    }
+
+    .content {
+      padding: 14px 14px 16px
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px
+    }
+
+    .name {
+      font-weight: 700;
+      line-height: 1.2
+    }
+
+    .price {
+      font-weight: 800;
+      color: #f8fafc
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px
+    }
+
+    .tag {
+      font-size: 11px;
+      padding: 6px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--ring);
+      color: var(--accent);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px
+    }
+
+    .btn {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--ring);
+      background: rgba(255, 255, 255, .03);
+      color: var(--text);
+      cursor: pointer
+    }
+
+    .btn:hover {
+      border-color: var(--accent-2)
+    }
+
+    .btn.primary {
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      color: #03202a;
+      border: none;
+      font-weight: 800
+    }
+
+    .empty {
+      padding: 28px;
+      border: 1px dashed var(--ring);
+      border-radius: 16px;
+      text-align: center;
+      color: var(--muted);
+      margin-top: 12px
+    }
+
+    dialog {
+      padding: 0;
+      border: none;
+      border-radius: 16px;
+      background: #0b1223;
+      color: var(--text);
+      max-width: 680px;
+      width: 92%;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--ring)
+    }
+
+    .modal-body {
+      padding: 18px
+    }
+
+    .close {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 22px;
+      cursor: pointer
+    }
+
+    dialog::backdrop {
+      background: rgba(2, 6, 23, .6)
+    }
+
+    footer {
+      margin: 28px 0 8px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center
+    }
+
+    a {
+      color: var(--accent)
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <div class="title">Katalog Produk</div>
+        <div class="subtitle">Contoh katalog simple dengan <em>search</em>, filter kategori, urut, dan modal detail.
+        </div>
+      </div>
+      <div class="toolbar">
+        <input id="q" type="search" placeholder="Cari produk (nama / deskripsi)" />
+        <select id="cat">
+          <option value="">Semua Kategori</option>
+        </select>
+        <select id="sort">
+          <option value="name-asc">Urut: Nama A→Z</option>
+          <option value="name-desc">Urut: Nama Z→A</option>
+          <option value="price-asc">Urut: Harga termurah</option>
+          <option value="price-desc">Urut: Harga termahal</option>
+        </select>
+      </div>
+    </header>
+
+    <div id="grid" class="grid" aria-live="polite"></div>
+    <div id="empty" class="empty" style="display:none">Tidak ada produk yang cocok dengan filter.</div>
+
+    <footer>
+      Dibuat dengan ♥ oleh Dharma.
+    </footer>
+  </div>
+
+  <dialog id="modal">
+    <div class="modal-header">
+      <strong id="mTitle">Detail Produk</strong>
+      <button class="close" aria-label="Tutup" onclick="modal.close()">×</button>
+    </div>
+    <div class="modal-body">
+      <img id="mImg" alt="Gambar produk" class="thumb" style="border-radius:12px" />
+      <p class="muted" id="mCat" style="margin:10px 0 0"></p>
+      <h3 id="mName" style="margin:6px 0 0"></h3>
+      <p id="mDesc" class="muted" style="margin:8px 0 12px"></p>
+      <div class="row"><span class="tag" id="mTag"></span><span class="price" id="mPrice"></span></div>
+    </div>
+  </dialog>
+
+  <script>
+
+    const PRODUCTS = [
+      {
+        id: 'p1', name: 'Tas Kanvas', price: 159000,
+        category: 'Fashion', tag: 'Baru',
+        desc: 'Tas kanvas ringan".',
+        img:'gamvar/tas kanvas.jpeg'
+      },
+      {
+        id: 'p2', name: 'Tumbler 600ml', price: 89000,
+        category: 'Rumah Tangga', tag: 'Best Seller',
+        desc: 'Botol minum stainless double-wall, bisa panas & dingin.',
+        img: 'gamvar/tumbler.jpeg'
+      },
+      {
+        id: 'p3', name: 'airpod', price: 129000,
+        category: 'Elektronik', tag: 'Promo',
+        desc: 'Driver 10mm dengan noise cancelation',
+        img: 'gamvar/airpod.jpeg'
+      },
+      {
+        id: 'p4', name: 'Notebook A5 Dotted', price: 39000,
+        category: 'Alat Tulis', tag: 'Baru',
+        desc: 'Kertas 100 gsm',
+        img: 'gamvar/notebook.jpeg'
+      },
+      {
+        id: 'p5', name: 'Lampu Meja LED', price: 175000,
+        category: 'Elektronik', tag: 'Hemat Energi',
+        desc: 'Lampu LED tiga tingkat kecerahan dengan lengan fleksibel.',
+        img: 'gamvar/lampu.jpg'
+      },
+      {
+        id: 'p6', name: 'Kaos Oversize', price: 99000,
+        category: 'Fashion', tag: 'Limited',
+        desc: 'Bahan katun combed 24s, potongan oversized unisex.',
+        img: 'gamvar/kaos.png'
+      },
+      {
+        id: 'p7', name: 'Kopi 250ml', price: 29000,
+        category: 'Rumah Tangga', tag: 'Harian',
+        desc: 'kopi dengan biji pilihan',
+        img: 'gamvar/kopi.jpg'
+      },
+      {
+        id: 'p8', name: 'Ransel Anti-Air', price: 279000,
+        category: 'Fashion', tag: 'Travel',
+        desc: 'Ransel 20L bahan water-repellent untuk aktivitas outdoor.',
+        img: 'gamvar/tas.jpg'
+      }
+    ];
+
+    // ===== UTIL =====
+    const fmtIDR = n => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
+
+    // ===== STATE =====
+    let state = { q: "", cat: "", sort: "name-asc" };
+
+    // ===== DOM =====
+    const grid = document.getElementById('grid');
+    const empty = document.getElementById('empty');
+    const q = document.getElementById('q');
+    const cat = document.getElementById('cat');
+    const sort = document.getElementById('sort');
+    const modal = document.getElementById('modal');
+    const mTitle = document.getElementById('mTitle');
+    const mImg = document.getElementById('mImg');
+    const mCat = document.getElementById('mCat');
+    const mName = document.getElementById('mName');
+    const mDesc = document.getElementById('mDesc');
+    const mTag = document.getElementById('mTag');
+    const mPrice = document.getElementById('mPrice');
+
+    // ===== INIT CATEGORY OPTIONS =====
+    const categories = Array.from(new Set(PRODUCTS.map(p => p.category))).sort();
+    for (const c of categories) {
+      const opt = document.createElement('option');
+      opt.value = c; opt.textContent = c; cat.appendChild(opt);
+    }
+
+    // ===== RENDER =====
+    function render() {
+      const qv = state.q.trim().toLowerCase();
+      let list = PRODUCTS.filter(p => (
+        (!state.cat || p.category === state.cat) &&
+        (!qv || (p.name.toLowerCase().includes(qv) || p.desc.toLowerCase().includes(qv)))
+      ));
+
+      switch (state.sort) {
+        case 'name-asc': list.sort((a, b) => a.name.localeCompare(b.name)); break;
+        case 'name-desc': list.sort((a, b) => b.name.localeCompare(a.name)); break;
+        case 'price-asc': list.sort((a, b) => a.price - b.price); break;
+        case 'price-desc': list.sort((a, b) => b.price - a.price); break;
+      }
+
+      grid.innerHTML = '';
+      if (list.length === 0) { empty.style.display = 'block'; return } else { empty.style.display = 'none' }
+
+      for (const p of list) {
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.innerHTML = `
+          <img src="${p.img}" alt="${p.name}" class="thumb" loading="lazy"/>
+          <div class="content">
+            <div class="row">
+              <div>
+                <div class="name">${p.name}</div>
+                <div class="muted">${p.category}</div>
+              </div>
+              <div class="price">${fmtIDR(p.price)}</div>
+            </div>
+            <div class="actions">
+              <button class="btn" data-act="detail" data-id="${p.id}">Detail</button>
+              <button class="btn primary" data-act="buy" data-id="${p.id}">Tambah</button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      }
+    }
+
+    // ===== EVENTS =====
+    q.addEventListener('input', e => { state.q = e.target.value; render() })
+    cat.addEventListener('change', e => { state.cat = e.target.value; render() })
+    sort.addEventListener('change', e => { state.sort = e.target.value; render() })
+
+    grid.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const id = btn.getAttribute('data-id');
+      const act = btn.getAttribute('data-act');
+      const p = PRODUCTS.find(x => x.id === id);
+      if (!p) return;
+
+      if (act === 'detail') {
+        mTitle.textContent = 'Detail Produk';
+        mImg.src = p.img; mImg.alt = p.name;
+        mCat.textContent = p.category;
+        mName.textContent = p.name;
+        mDesc.textContent = p.desc;
+        mTag.textContent = p.tag;
+        mPrice.textContent = fmtIDR(p.price);
+        modal.showModal();
+      }
+      if (act === 'buy') {
+        // Demo interaksi (tidak ada keranjang):
+        alert(`Ditambahkan: ${p.name} ( ${fmtIDR(p.price)} )`);
+      }
+    });
+
+    // Tutup modal dengan ESC / klik backdrop
+    modal.addEventListener('click', (e) => {
+      const rect = modal.getBoundingClientRect();
+      const inDialog = (
+        e.clientX >= rect.left && e.clientX <= rect.right &&
+        e.clientY >= rect.top && e.clientY <= rect.bottom
+      );
+      if (!inDialog) modal.close();
+    });
+
+    render();
+  </script>
+</body>
+
+</html>
