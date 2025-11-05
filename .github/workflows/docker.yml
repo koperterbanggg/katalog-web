@@ -3,6 +3,7 @@ name: Build & Push to GHCR
 on:
   push:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -10,10 +11,10 @@ jobs:
 
     permissions:
       contents: read
-      packages: write
+      packages: write   
 
     steps:
-      - name: Checkout source
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
@@ -26,7 +27,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build & Push Image
+      - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
