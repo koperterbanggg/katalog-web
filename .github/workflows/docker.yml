@@ -1,7 +1,10 @@
 name: Build & Push to GHCR
+
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main" ]       # push ke main => build & push image
+  pull_request:
+    branches: [ "main" ]       # PR ke main => build saja (tanpa push)
   workflow_dispatch: {}
 
 jobs:
@@ -10,23 +13,49 @@ jobs:
 
     permissions:
       contents: read
-      packages: write
-
+      packages: write         
+    env:
+      IMAGE: ghcr.io/koperterbanggg/katalog-web
+      DOCKERFILE: Dockerfile  
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Login to GHCR
+      - name: Ensure Dockerfile exists
+        run: |
+          test -f "${{ env.DOCKERFILE }}" || { echo "Dockerfile not found at $DOCKERFILE"; exit 1; }
+          echo "Found $DOCKERFILE"
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+    
+      - name: Login to GHCR with PAT
+        if: ${{ secrets.GHCR_TOKEN != '' }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_TOKEN }}
 
+     
+      - name: Login to GHCR with GITHUB_TOKEN
+        if: ${{ secrets.GHCR_TOKEN == '' }}
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Build (PR) / Build+Push (main)
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: true
-          tags: ghcr.io/koperterbanggg/katalog-web:latest
+          file: ${{ env.DOCKERFILE }}
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
